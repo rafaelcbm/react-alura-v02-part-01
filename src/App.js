@@ -42,12 +42,12 @@ class App extends Component {
         return posAtual !== index;
       }),
     })
-
   }
 
   escutadorDeSubmit = autor => {
     this.setState({ autores: [...this.state.autores, autor] });
   }
+
   render() {
     return (
       <Fragment>
