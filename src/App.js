@@ -1,65 +1,68 @@
 import React, { Component, Fragment } from 'react';
 import 'materialize-css/dist/css/materialize.min.css';
 import './App.css';
-import Tabela from './Tabela';
-import Formulario from './Formulario';
 import Header from './Header';
-
+import Tabela from './Tabela';
+import Form from './Formulario';
+import PopUp from './PopUp';
+import ApiService from './ApiService';
 
 class App extends Component {
 
-  state = {
-    autores: [
-      {
-        nome: 'Paulo',
-        livro: 'React',
-        preco: '1000'
-      },
-      {
-        nome: 'Daniel',
-        livro: 'Java',
-        preco: '99'
-      },
-      {
-        nome: 'Marcos',
-        livro: 'Design',
-        preco: '150'
-      },
-      {
-        nome: 'Bruno',
-        livro: 'DevOps',
-        preco: '100'
-      }
-    ],
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      autores: [],
+    };
   }
 
-  removeAutor = index => {
+  removeAutor = id => {
 
     const { autores } = this.state;
 
-    this.setState({
-      autores: autores.filter((autor, posAtual) => {
-        return posAtual !== index;
-      }),
-    })
+    this.setState(
+      {
+        autores: autores.filter(autor => {
+          return autor.id !== id;
+        }),
+      }
+    );
+    PopUp.exibeMensagem("error", "Autor removido com sucesso");
+    ApiService.RemoveAutor(id);
   }
 
   escutadorDeSubmit = autor => {
-    this.setState({ autores: [...this.state.autores, autor] });
+    ApiService.CriaAutor(JSON.stringify(autor))
+      .then(res => res.data)
+      .then(autor => {
+        this.setState({ autores: [...this.state.autores, autor] });
+        PopUp.exibeMensagem("success", "Autor adicionado com sucesso");
+      })
+  }
+
+  componentDidMount() {
+    ApiService.ListaAutores()
+      .then(res => {
+        this.setState({ autores: [...this.state.autores, ...res.data] })
+
+      })
   }
 
   render() {
+
     return (
       <Fragment>
         <Header />
         <div className="container mb-10">
-          <h1>Casa do código</h1>
+          <h1>Casa do Código</h1>
           <Tabela autores={this.state.autores} removeAutor={this.removeAutor} />
-          <Formulario escutadorDeSubmit={this.escutadorDeSubmit} />
+          <Form escutadorDeSubmit={this.escutadorDeSubmit} />
         </div>
       </Fragment>
     );
   }
+
 }
 
 export default App;
